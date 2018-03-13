@@ -25,11 +25,13 @@ def train_model(args):
     test_dataset = create_dataset('data/test/', timesteps=sequence_length)
     test_loader = dataloader(test_dataset, batch_size=batch_size)
 
-    # Define model
+    # Define model and loss
     rnn = RNN('LSTM', input_size, hidden_size, num_layers, num_classes)
-
-    # Loss and Optimizer
     criterion = nn.CrossEntropyLoss()
+    if args.cuda: # switch to cuda
+        rnn, criterion = rnn.cuda(), criterion.cuda()
+
+    # Adam Optimizer
     optimizer = torch.optim.Adam(rnn.parameters(), lr=learning_rate)
 
     # Train the Model
@@ -41,6 +43,9 @@ def train_model(args):
         for batch_X, batch_y in train_loader:
             points = Variable(torch.from_numpy(batch_X))
             labels = Variable(torch.from_numpy(batch_y))
+
+            if args.cuda:
+                points, labels = points.cuda(), labels.cuda()
 
             # Forward + Backward + Optimize
             optimizer.zero_grad()

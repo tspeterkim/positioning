@@ -12,10 +12,13 @@ def eval_model(rnn, data_loader):
     total = 0
     for batch_X, batch_y in data_loader:
         points = Variable(torch.from_numpy(batch_X))
+        labels = torch.from_numpy(batch_y)
+        if next(rnn.parameters()).is_cuda:
+            points, labels = points.cuda(), labels.cuda()
         outputs = rnn(points)
         _, predicted = torch.max(outputs.data, 1)
-        total += batch_y.shape[0]
-        correct += (predicted == torch.from_numpy(batch_y)).sum()
+        total += labels.size(0)
+        correct += (predicted == labels).sum()
     return correct / total
 
 
@@ -32,7 +35,9 @@ def test_model(args):
 
     # Load back the best performing model
     rnn = RNN('LSTM', input_size, hidden_size, num_layers, num_classes)
-    rnn.load_state_dict(torch.load('rnn.pkl'))
+    if args.cuda:
+        rnn = rnn.cuda()
+    rnn.load_state_dict(torch.load(args.model_path))
 
     train_dataset = create_dataset('data/train/', timesteps=sequence_length)
     train_loader = dataloader(train_dataset, batch_size=batch_size)

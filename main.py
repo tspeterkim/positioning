@@ -18,6 +18,7 @@ parser.add_argument('--batch_size', type=int, default=128)
 parser.add_argument('--num_epochs', type=int, default=50)
 parser.add_argument('--learning_rate', type=int, default=0.001)
 parser.add_argument('--seed', type=int, default=42)
+parser.add_argument('--dropout', type=float, default=0)
 parser.add_argument('--model_path', type=str, default='rnn.pkl')
 args = parser.parse_args()
 

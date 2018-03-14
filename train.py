@@ -18,6 +18,7 @@ def train_model(args):
     batch_size = args.batch_size
     num_epochs = args.num_epochs
     learning_rate = args.learning_rate
+    dropout = args.dropout
 
     # Create the dataset
     train_dataset = create_dataset('data/train/', timesteps=sequence_length)
@@ -26,7 +27,7 @@ def train_model(args):
     test_loader = dataloader(test_dataset, batch_size=batch_size)
 
     # Define model and loss
-    rnn = RNN('LSTM', input_size, hidden_size, num_layers, num_classes)
+    rnn = RNN('LSTM', input_size, hidden_size, num_layers, num_classes, dropout)
     criterion = nn.CrossEntropyLoss()
     if args.cuda: # switch to cuda
         rnn, criterion = rnn.cuda(), criterion.cuda()

@@ -8,8 +8,7 @@ from utils import *
 
 def eval_model(rnn, data_loader):
     # Test the Model
-    correct = 0
-    total = 0
+    correct, total = 0, 0
     for batch_X, batch_y in data_loader:
         points = Variable(torch.from_numpy(batch_X))
         labels = torch.from_numpy(batch_y)
@@ -32,9 +31,10 @@ def test_model(args):
     batch_size = args.batch_size
     num_epochs = args.num_epochs
     learning_rate = args.learning_rate
+    dropout = args.dropout
 
     # Load back the best performing model
-    rnn = RNN('LSTM', input_size, hidden_size, num_layers, num_classes)
+    rnn = RNN('LSTM', input_size, hidden_size, num_layers, num_classes, dropout)
     if args.cuda:
         rnn = rnn.cuda()
     rnn.load_state_dict(torch.load(args.model_path))

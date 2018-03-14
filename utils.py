@@ -1,20 +1,38 @@
 import numpy as np
 
+def find_sampling_freq(path, pos):
+    with open(path+pos+'/1_android.sensor.accelerometer.data.csv') as f:
+        freq = 0
+        lower = float(f.readline().split(',')[0])
+        for i, line in enumerate(f):
+            upper = float(line.split(',')[0])
+            second = (upper-lower)/1000
+            if 0.99 <= second and second <= 1.01:
+                freq = i+1
+                break
+        return freq
+
+
 def create_dataset(path, timesteps):
     X = []
     y = []
     positions = ['layingdown','sitting','standing','walking']
+    print(path)
     for ip, p in enumerate(positions):
         data = []
         with open(path+p+'/1_android.sensor.accelerometer.data.csv') as f:
+            # ts = find_sampling_freq(path, p)
+            # if ts == 0:
+            ts = timesteps
+            print('\tsampling freq = %i'% ts)
             row = []
             for i, line in enumerate(f):
                 row.append([float(x) for x in line.split(',')[1:4]])
-                if len(row) == timesteps:
+                if len(row) == ts:
                     data.append(np.stack(row))
                     row = []
         data = np.stack(data)
-        print("%s : %i examples loaded" % (p, data.shape[0]))
+        print("\t%s : %i examples loaded" % (p, data.shape[0]))
         X.append(data)
         y.append(np.zeros(data.shape[0])+ip)
 

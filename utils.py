@@ -24,15 +24,19 @@ def create_dataset(path, timesteps):
             # ts = find_sampling_freq(path, p)
             # if ts == 0:
             ts = timesteps
-            print('\tsampling freq = %i'% ts)
+            # print('\tsampling freq = %i'% ts)
             row = []
             for i, line in enumerate(f):
                 row.append([float(x) for x in line.split(',')[1:4]])
                 if len(row) == ts:
                     data.append(np.stack(row))
                     row = []
+        # Zero pad to account for different sampling frequency
+        # max_len = np.amax([x.shape[0] for x in data])
+        # print('\tmax sampling frequency = %i' % max_len)
+        # data = [np.lib.pad(x, ((0,0),(0,max_len-x.shape[1])), 'constant') for x in data]
         data = np.stack(data)
-        print("\t%s : %i examples loaded" % (p, data.shape[0]))
+        print("\t%s: %i examples loaded" % (p, data.shape[0]))
         X.append(data)
         y.append(np.zeros(data.shape[0])+ip)
 
@@ -41,8 +45,8 @@ def create_dataset(path, timesteps):
     # print(X.shape, y.shape)
     return (X, y)
 
+
 def dataloader(train_dataset, batch_size):
-    # for i, (images, labels) in enumerate(train_loader)
     X, y = train_dataset
     arr = np.arange(X.shape[0])
     np.random.shuffle(arr)
@@ -54,3 +58,7 @@ def dataloader(train_dataset, batch_size):
             batches.append((np.stack(batch_x).astype(np.float32), np.array(batch_y).astype(int)))
             batch_x, batch_y = [], []
     return batches
+
+
+if __name__ == '__main__':
+    print("sampling frequency = %i" % find_sampling_freq('data/test/','standing'))

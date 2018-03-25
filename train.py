@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 from model import RNN
 from evaluate import eval_model
@@ -33,15 +34,16 @@ def train_model(args):
         rnn, criterion = rnn.cuda(), criterion.cuda()
 
     # Adam Optimizer
-    optimizer = torch.optim.Adam(rnn.parameters(), lr=learning_rate)
+    optimizer = torch.optim.Adam(rnn.parameters(), learning_rate)
 
     # Train the Model
     i = 0 # updates
     best_test_acc = 0.0
     for epoch in range(num_epochs):
         # Generate random batches every epoch
-        train_loader = dataloader(train_dataset, batch_size=batch_size)
+        train_loader = dataloader(train_dataset, batch_size)
         for batch_X, batch_y in train_loader:
+            # points = pack_padded_sequence(Variable(torch.from_numpy(batch_X)), batch_seq_lens)
             points = Variable(torch.from_numpy(batch_X))
             labels = Variable(torch.from_numpy(batch_y))
 
@@ -50,7 +52,8 @@ def train_model(args):
 
             # Forward + Backward + Optimize
             optimizer.zero_grad()
-            outputs = rnn(points)
+            outputs = rnn(points) # final hidden state
+            # outputs = pad_packed_sequence(outputs)
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
